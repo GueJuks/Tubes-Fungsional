@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quran Favorites</title>
+</head>
+<body>
+    <h1>Quran Favorites</h1>
+
+    <h2>Your Favorites</h2>
+    <p>Total Favorites: {{ num_favorites }}</p>
+    <p>Sum of Favorites: {{ sum_favorites }}</p>
+
+    <ul>
+        {% for favorite in favorites %}
+        <li>
+            <span>{{ favorite.surah_number }}. {{ favorite.surah_name }}</span>
+            <form action="/" method="POST">
+                <input type="hidden" name="surah_number" value="{{ favorite.surah_number }}">
+                <input type="hidden" name="surah_name" value="{{ favorite.surah_name }}">
+                <button type="submit">Add to Favorites</button>
+            </form>
+            <button class="delete" data-id="{{ favorite.id }}">Remove from Favorites</button>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Search Results</h2>
+    <form action="/" method="GET">
+        <input type="text" name="search" placeholder="Search...">
+        <button type="submit">Search</button>
+    </form>
+
+    <br>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Nama</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if data %}
+                {% for item in data %}
+                <tr>
+                    <td>{{ item.nomor }}</td>
+                    <td>{{ item.nama }}</td>
+                    <td>
+                        <form action="/" method="POST">
+                            <button type="submit">Tambah</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="2">No data available.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    
+
+    <script>
+        // Ajax request to delete favorite
+        document.querySelectorAll('.delete').forEach(button => {
+            button.addEventListener('click', () => {
+                const favoriteId = button.dataset.id;
+                fetch('/', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: favoriteId }),
+                })
+                .then(response => {
+                    if (response.ok) {
+                        button.parentNode.remove();
+                    } else {
+                        alert('Failed to delete favorite.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete favorite.');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
