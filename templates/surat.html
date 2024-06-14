@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al Quran Online</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+     <!-- Form pencarian -->
+     <!-- <form action="" method="POST">
+        <label for="search_query">Cari Ayat:</label>
+        <input type="text" id="search_query" name="search_query" value="{{ search_query }}">
+        <button type="submit">Cari</button>
+    </form> -->
+
+    <a class="back-link" href="/">Kembali ke daftar</a>
+    <h1>{{ surat['nomor'] }}</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nomor</th>
+                <th>Ayat</th>
+                <th>Arti</th>
+                <th>Latin</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for surats in surat %}
+            <tr>
+                <td>{{ surats['nomor'] }}</td>
+                <td>{{ surats['ar'] }}</td>
+                <td>{{ surats['id'] }}</td>
+                <td>{{ surats['tr']|safe }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</body>
+
+</html>

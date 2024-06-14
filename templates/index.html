@@ -1,94 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quran Favorites</title>
+    <title>Daftar Favorit</title>
 </head>
+
 <body>
-    <h1>Quran Favorites</h1>
 
-    <h2>Your Favorites</h2>
-    <p>Total Favorites: {{ num_favorites }}</p>
-    <p>Sum of Favorites: {{ sum_favorites }}</p>
+    <div>
+        <ul>
+            {% if session['nama'] %}
+            <li>
+                <a href="/logout">Logout</a>
+            </li>
+            {% else %}
+            <li>
+                <a href="/login">Login</a>
+            </li>
+            <li>
+                <a href="/register">Register</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
 
-    <ul>
-        {% for favorite in favorites %}
-        <li>
-            <span>{{ favorite.surah_number }}. {{ favorite.surah_name }}</span>
-            <form action="/" method="POST">
-                <input type="hidden" name="surah_number" value="{{ favorite.surah_number }}">
-                <input type="hidden" name="surah_name" value="{{ favorite.surah_name }}">
-                <button type="submit">Add to Favorites</button>
-            </form>
-            <button class="delete" data-id="{{ favorite.id }}">Remove from Favorites</button>
-        </li>
-        {% endfor %}
-    </ul>
+    <div>
+        <h2>Welcome</h2>
+        {% if session['nama'] %}
+        <p>You Login as {{ session['nama'] }}</p>
+        {% else %}
+        <p>Not Login yet</p>
+        {% endif %}
+    </div>
 
-    <h2>Search Results</h2>
-    <form action="/" method="GET">
-        <input type="text" name="search" placeholder="Search...">
-        <button type="submit">Search</button>
-    </form>
-
-    <br>
-
+    <h1>Daftar Favorit</h1>
+    <p>Jumlah seluruh data favorite menggunakan len(): {{ num_favorites }}</p> <!-- Tampilan jumlah seluruh data favorit menggunakan len() -->
+    <p>Jumlah seluruh data favorite menggunakan sum(): {{ sum_favorites }}</p> <!-- Tampilan jumlah seluruh data favorit menggunakan len() -->
     <table border="1">
         <thead>
             <tr>
-                <th>No.</th>
-                <th>Nama</th>
+                <!-- <th>ID</th> -->
+                <th>Surah Number</th>
+                <th>Surah Name</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            {% if data %}
-                {% for item in data %}
-                <tr>
-                    <td>{{ item.nomor }}</td>
-                    <td>{{ item.nama }}</td>
-                    <td>
-                        <form action="/" method="POST">
-                            <button type="submit">Tambah</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="2">No data available.</td>
-                </tr>
-            {% endif %}
+            {% for favorite in favorites %}
+            <tr>
+                <!-- <td>{{ favorite.id }}</td> -->
+                <td>{{ favorite.surah_number }}</td>
+                <td>
+                    <a href="/surat/{{ favorite.surah_number }}">
+                        <!-- Surah {{ favorite.surah_number }}: {{ data[favorite.surah_number - 1]['nama'] }} -->
+                        Surah {{ data[favorite.surah_number - 1]['nama'] }}
+                    </a>
+                </td>
+
+                <td>
+                    <form class="delete-form" action="/" method="POST">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="id" value="{{ favorite.id }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
-    
+
+    <br>
+
+    <!-- Pencarian -->
+    <form action="/" method="GET">
+        <label for="search">Cari Surah:</label>
+        <input type="text" id="search" name="search" placeholder="Masukkan nama atau nomor surah">
+        <button type="submit">Cari</button>
+    </form>
+
+    <!-- Menampilkan hasil pencarian -->
+    {% if search_results %}
+    <h2>Hasil Pencarian:</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Nomor Surah</th>
+                <th>Nama Surah</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in search_results %}
+            <tr>
+                <td>{{ result['nama'] }} ({{ result['nomor'] }})</td>
+                <td>
+                    <a href="/surat/{{ result['nomor'] }}">
+                        {{ result['nama'] }}
+                    </a>
+                </td>
+                <td>
+                    <form action="/" method="POST">
+                        <input type="hidden" name="surah_number" value="{{ result['nomor'] }}">
+                        <input type="hidden" name="surah_name" value="{{ result['nama'] }}">
+                        <button type="submit">Tambah</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 
     <script>
-        // Ajax request to delete favorite
-        document.querySelectorAll('.delete').forEach(button => {
-            button.addEventListener('click', () => {
-                const favoriteId = button.dataset.id;
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Menghentikan pengiriman formulir bawaan
+                const id = this.querySelector('input[name="id"]').value; // Mendapatkan ID data yang akan dihapus
                 fetch('/', {
                     method: 'DELETE',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ id: favoriteId }),
-                })
-                .then(response => {
+                    body: JSON.stringify({ id: id }) // Mengirimkan ID sebagai data JSON
+                }).then(response => {
                     if (response.ok) {
-                        button.parentNode.remove();
+                        window.location.reload(); // Memuat ulang halaman setelah penghapusan berhasil
                     } else {
-                        alert('Failed to delete favorite.');
+                        console.error('Gagal menghapus data');
                     }
-                })
-                .catch(error => {
+                }).catch(error => {
                     console.error('Error:', error);
-                    alert('Failed to delete favorite.');
                 });
             });
         });
     </script>
+
 </body>
+
 </html>
